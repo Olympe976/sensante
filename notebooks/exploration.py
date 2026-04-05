@@ -51,3 +51,11 @@ print(f"\n{"=" * 50}")
 print("Exploration terminee !")
 print("Prochain lab: entrainer un modele ML")
 print(f"\n{"=" * 50}")
+
+
+# ======== AFFICHAGE DU NOMBRE DE PATIENTS PAR SEXE ET PAR DIAGNOSTIC =============
+print(f"\n---- Nombre de patients par sexe et par diagnostic ----")
+nb_patient_by_sex_and_diag = df.groupby(["diagnostic", "sexe"]).size();
+for  (diag, sexe), nb in nb_patient_by_sex_and_diag.items():
+    print(f"  {diag:10s} : {sexe:3s}  {nb:3d} patients")
+    
