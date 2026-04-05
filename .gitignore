@@ -1,0 +1,17 @@
+#Fichiers à ne pas versionner
+#Environnement python
+__pycache__/
+*.pyc
+venv/
+.env
+
+#Modele ML
+models/*.pkl
+
+#Fichiers DS
+.DS_Store
+Thumbs.db
+
+#IDE
+.vscode/
+.idea/
