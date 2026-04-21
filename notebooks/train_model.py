@@ -100,29 +100,29 @@ print (" Figure sauvegardee dans figures/confusion_matrix.png ")
 import joblib
 import os
 # Creer le dossier models / s'il n'existe pas
-os.makedirs (" models ", exist_ok = True )
+os.makedirs ("models", exist_ok = True )
 # Serialiser le modele
-joblib.dump (model , " models/model.pkl ")
+joblib.dump (model , "models/model.pkl ")
 # Verifier la taille du fichier
-size = os.path.getsize (" models/model.pkl ")
+size = os.path.getsize ("models/model.pkl ")
 print (f" Modele sauvegarde : models/model.pkl ")
 print (f" Taille : { size/1024:.1f} Ko")
 
 
 # Sauvegarder les encodeurs ( indispensables pour les nouvelles donnees )
-joblib.dump ( le_sexe , " models/encoder_sexe.pkl ")
-joblib.dump ( le_region , " models/encoder_region.pkl ")
+joblib.dump ( le_sexe , "models/encoder_sexe.pkl")
+joblib.dump ( le_region , "models/encoder_region.pkl")
 # Sauvegarder la liste des features ( pour reference )
-joblib.dump ( feature_cols , " models/feature_cols.pkl ")
+joblib.dump ( feature_cols , "models/feature_cols.pkl")
 print (" Encodeurs et metadata sauvegardés .")
 
 
 
 # Simuler ce que fera l'API en Lab 3 :
 # Charger le modele DEPUIS LE FICHIER ( pas depuis la memoire )
-model_loaded = joblib.load (" models/model.pkl ")
-le_sexe_loaded = joblib.load (" models/encoder_sexe.pkl ")
-le_region_loaded = joblib.load (" models/encoder_region.pkl ")
+model_loaded = joblib.load ("models/model.pkl")
+le_sexe_loaded = joblib.load ("models/encoder_sexe.pkl")
+le_region_loaded = joblib.load ("models/encoder_region.pkl")
 print (f" Modele recharge : { type ( model_loaded ). __name__ }")
 print (f" Classes : { list ( model_loaded.classes_ )}")
 
