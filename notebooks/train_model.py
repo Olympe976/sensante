@@ -164,3 +164,97 @@ print (f"\nProbabilites par classe :")
 for classe , proba in zip ( model_loaded.classes_ , probas ):
     bar = '#' * int ( proba * 30)
     print (f" { classe :8s} : { proba :.1%} { bar }")
+
+
+# Exercice 1
+# Importance des features
+print("\n\nImportance des features")
+importances = model.feature_importances_
+for name, imp in sorted(zip(feature_cols, importances), key=lambda x: x[1], reverse=True):
+    print(f"    {name:20s}  :   {imp:.3f}")
+
+
+# Exercice 2 - Tester avec d'autres patients
+# Patient sain
+patient1 = {
+    'age': 18,
+    'sexe': 'M',
+    'temperature': 37 ,
+    'tension_sys': 11 ,
+    'toux': False ,
+    'fatigue': False ,
+    'maux_tete': False ,
+    'region': 'Dakar'
+}
+# Adulte avec forte fievre
+patient2 = {
+    'age': 36,
+    'sexe': 'F',
+    'temperature': 39.3 ,
+    'tension_sys': 12 ,
+    'toux': False ,
+    'fatigue': False ,
+    'maux_tete': False ,
+    'region': 'Dakar'
+}
+# Patient agé aec toux
+patient3 = {
+    'age': 77,
+    'sexe': 'M',
+    'temperature': 37 ,
+    'tension_sys': 10 ,
+    'toux': True ,
+    'fatigue': False ,
+    'maux_tete': False ,
+    'region': 'Dakar'
+}
+
+patients = [patient1, patient2, patient3]
+features_new_patients = []
+for pat in patients:
+    sexe_enc = le_sexe_loaded.transform([pat['sexe']])[0]
+    region_enc  = le_region_loaded.transform ([ pat['region']])[0]
+
+    # vecteur feature
+    feat = [
+        pat["age"],
+        sexe_enc,
+        pat["temperature"],
+        pat["tension_sys"],
+        int(pat["toux"]),
+        int(pat["fatigue"]),
+        int(pat["maux_tete"]),
+        region_enc
+    ]
+
+    features_new_patients.append(feat)
+
+# Faire les predictions
+diagnostics = []
+probas_list = []
+probas_max = []
+
+for f in features_new_patients:
+    diag = model_loaded.predict([f])[0]
+    proba = model_loaded.predict_proba([f])[0]
+    proba_max = proba.max()
+
+    diagnostics.append(diag)
+    probas_list.append(proba)
+    probas_max.append(proba_max)
+
+# Affichage des resultats
+print (f"\n--- Resultats du pre - diagnostic ---")
+for i in range(len(diagnostics)):
+    print (f" Patient : { patients[i]['sexe']}, { patients[i]['age']} ans")
+    print (f" Diagnostic : { diagnostics[i] }")
+    print (f" Probabilite : { probas_max[i] :.1%} ")
+    print (f"\nProbabilites par classe :")
+    for classe , proba in zip ( model_loaded.classes_ , probas_list[i] ):
+        bar = '#' * int ( proba * 30)
+        print (f" { classe :8s} : { proba :.1%} { bar }")
+
+    print(f"\n")
+
+
+
