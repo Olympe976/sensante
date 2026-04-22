@@ -124,3 +124,18 @@ def predict(patient : PatientInput):
         confiance=confiance,
         message=messages.get(diagnostic, "Consultez un médecin")
     )
+
+
+# Ajout de l'endpoint /model-info
+@app.get("/model-info")
+def model_info():
+    """Renvoyer des informations sur le modèle (type, nombre d'arbres, classes possibles et nbre de features)"""
+
+    return {
+        "type" : f"{type(model).__name__}",
+        "nombre_arbres" : f"{model.n_estimators}",
+        "classes_possibles" : f"{list(model.classes_)}",
+        "nombre_features" : f"{model.n_features_in_}"
+    }
+
+
