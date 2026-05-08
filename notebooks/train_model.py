@@ -102,9 +102,9 @@ import os
 # Creer le dossier models / s'il n'existe pas
 os.makedirs ("models", exist_ok = True )
 # Serialiser le modele
-joblib.dump (model , "models/model.pkl ")
+joblib.dump (model , "models/model.pkl")
 # Verifier la taille du fichier
-size = os.path.getsize ("models/model.pkl ")
+size = os.path.getsize ("models/model.pkl")
 print (f" Modele sauvegarde : models/model.pkl ")
 print (f" Taille : { size/1024:.1f} Ko")
 
