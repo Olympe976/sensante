@@ -57,7 +57,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tension systolique</label>
                 <input type="number" id="tension_sys"
                     class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Ex: 120" min="60" max="250">
+                    placeholder="Ex: 120" min="5" max="250">
             </div>
 
             <!-- Symptomes (checkboxes) -->
@@ -84,15 +84,15 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Region</label>
                 <select id="region" class="w-full border border-gray-300 rounded-lg p-2">
                     <option value="Dakar">Dakar</option>
-                    <option value="Thies">Thies</option>
+                    <option value="Thiès">Thiès</option>
                     <option value="Saint-Louis">Saint-Louis</option>
                     <option value="Ziguinchor">Ziguinchor</option>
                     <option value="Tambacounda">Tambacounda</option>
                     <option value="Kaolack">Kaolack</option>
                     <option value="Diourbel">Diourbel</option>
                     <option value="Fatick">Fatick</option>
-                    <option value="Kolda">Kolda</option>
-                    <option value="Matam">Matam</option>
+                    <option value="Louga">Louga</option>
+                    <option value="Kédougou">Kédougou</option>
                 </select>
             </div>
 
@@ -103,13 +103,20 @@
             </button>
             </div>
                         
-            <!-- Colonne droite : resultat -->
-            <div id="result-section">
-                <div class="bg-white rounded-xl shadow-md p-6 text-center text-gray-400">
-                    <p class="text-4xl mb-3">&#129658;</p>
-                    <p class="font-medium">Remplissez le formulaire</p>
-                    <p class="text-sm mt-1">puis cliquez sur diagnostiquer</p>
-                </div>                 
+            <!-- Colonne droite : resultat et historique -->
+            <div>
+                <div id="result-section">
+                    <div class="bg-white rounded-xl shadow-md p-6 text-center text-gray-400">
+                        <p class="text-4xl mb-3">&#129658;</p>
+                        <p class="font-medium">Remplissez le formulaire</p>
+                        <p class="text-sm mt-1">puis cliquez sur diagnostiquer</p>
+                    </div>                 
+                </div>
+
+                <!-- Historique -->
+                <div id="historique-section" class="mt-6">
+
+                </div>
             </div>
 
         </div>
@@ -124,6 +131,8 @@
         <script>
             // URL de l'API (a changer si l'API est ailleurs)
             const API_URL = "http://localhost:8000";
+
+            const historique = [];
 
             async function diagnostiquer() {
                 // 1. Recupérer les valeurs du formulaire
@@ -191,15 +200,26 @@
             function afficherResultat(r) {
             // Codes couleur par diagnostic
             const couleurs = {
-                paludisme:   { bg: "bg-red-100",    text: "text-red-800",    bar: "bg-red-500",    badge: "bg-red-500" },
-                grippe: { bg: "bg-orange-100", text: "text-orange-800", bar: "bg-orange-500", badge: "bg-orange-500" },
-                typh:   { bg: "bg-yellow-100", text: "text-yellow-800", bar: "bg-yellow-500", badge: "bg-yellow-500" },
-                sain:   { bg: "bg-green-100",  text: "text-green-800",  bar: "bg-green-500",  badge: "bg-green-500" }
+                paludisme:   { bg: "bg-red-100",    text: "text-red-800",    bar: "bg-red-500",    badge: "bg-red-500" , emoji: "&#129439;"},
+                grippe: { bg: "bg-orange-100", text: "text-orange-800", bar: "bg-orange-500", badge: "bg-orange-500" , emoji: "&#127777;"},
+                typhoide:   { bg: "bg-yellow-100", text: "text-yellow-800", bar: "bg-yellow-500", badge: "bg-yellow-500" , emoji: "&#10052;"},
+                sain:   { bg: "bg-green-100",  text: "text-green-800",  bar: "bg-green-500",  badge: "bg-green-500" , emoji: "&#9989;"}
             };
 
             const c = couleurs[r.diagnostic] || couleurs["sain"];
             const pct = Math.round(r.probabilite * 100);
             const section = document.getElementById("result-section");
+
+            // Ajouter la consultation à l'historique (début)
+            historique.unshift({
+                diagnostic: r.diagnostic,
+                probabilite: pct,
+                confiance: r.confiance,
+                emoji: c.emoji
+            });
+            if (historique.length > 5) historique.pop(); // supprimer le dernier élément si on depasse 5
+            // Mettre à jour le tableau affiché
+            afficherHistorique();
 
             section.innerHTML = `
                 <div class="bg-white rounded-xl shadow-md p-6">
@@ -207,6 +227,7 @@
 
                 <div class="${c.bg} rounded-lg p-4 mb-4">
                     <p class="text-sm text-gray-600">Diagnostic :</p>
+                    <p class="text-3xl mb-1">${c.emoji}</p>
                     <p class="text-2xl font-bold ${c.text} uppercase mt-1">${r.diagnostic}</p>
                 </div>
 
@@ -239,6 +260,44 @@
                 <p class="text-red-700 font-medium">${msg}</p>
                 <p class="text-red-500 text-sm mt-2">Verifiez votre connexion et reessayez.</p>
                 </div>`;
+            }
+
+            function afficherHistorique() {
+                // Si pas encore de consultations, ne rien afficher
+                if (historique.length === 0) return;
+
+                // Construire les lignes du tableau dynamiquement
+                const lignes = historique.map((c, i) => `
+                    <tr class="border-t border-gray-100">
+                        <td class="py-2 px-3 text-sm text-gray-500">${i + 1}</td>
+                        <td class="py-2 px-3 text-sm font-medium">
+                            ${c.emoji} ${c.diagnostic}
+                        </td>
+                        <td class="py-2 px-3 text-sm text-gray-600">${c.probabilite}%</td>
+                        <td class="py-2 px-3 text-sm text-gray-600">${c.confiance}</td>
+                    </tr>
+                `).join("");
+
+                // Injecter le tableau dans la section historique
+                const histSection = document.getElementById("historique-section");
+                histSection.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">
+                            🕓 Historique des consultations
+                        </h3>
+                        <table class="w-full">
+                            <thead>
+                                <tr class="text-left text-xs text-gray-400 uppercase">
+                                    <th class="pb-2 px-3">N°</th>
+                                    <th class="pb-2 px-3">Diagnostic</th>
+                                    <th class="pb-2 px-3">Probabilité</th>
+                                    <th class="pb-2 px-3">Confiance</th>
+                                </tr>
+                            </thead>
+                            <tbody>${lignes}</tbody>
+                        </table>
+                    </div>`;
+
             }
         </script>
 </body>

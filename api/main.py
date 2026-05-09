@@ -14,7 +14,7 @@ class PatientInput(BaseModel):
     age : int = Field(..., ge=0, le=120, description="Age en années")
     sexe : str = Field(..., description="Sexe : M ou F")
     temperature : float = Field(..., ge=35.0, le=42.0, description="Temperature en Celsius")
-    tension_sys : int = Field(..., ge=60, le=250, description="Tension systolique")
+    tension_sys : int = Field(..., ge=5, le=250, description="Tension systolique")
     toux : bool = Field(..., description="Presence de toux")
     fatigue : bool = Field(..., description="Presence de fatigue")
     maux_tete : bool = Field(..., description="Présence de maux de tête")
