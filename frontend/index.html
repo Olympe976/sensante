@@ -201,9 +201,9 @@
             // Codes couleur par diagnostic
             const couleurs = {
                 paludisme:   { bg: "bg-red-100",    text: "text-red-800",    bar: "bg-red-500",    badge: "bg-red-500" , emoji: "&#129439;"},
-                grippe: { bg: "bg-orange-100", text: "text-orange-800", bar: "bg-orange-500", badge: "bg-orange-500" , emoji: "&#127777;"},
-                typhoide:   { bg: "bg-yellow-100", text: "text-yellow-800", bar: "bg-yellow-500", badge: "bg-yellow-500" , emoji: "&#10052;"},
-                sain:   { bg: "bg-green-100",  text: "text-green-800",  bar: "bg-green-500",  badge: "bg-green-500" , emoji: "&#9989;"}
+                grippe:      { bg: "bg-orange-100", text: "text-orange-800", bar: "bg-orange-500", badge: "bg-orange-500" , emoji: "&#127777;"},
+                typhoide:    { bg: "bg-yellow-100", text: "text-yellow-800", bar: "bg-yellow-500", badge: "bg-yellow-500" , emoji: "&#10052;"},
+                sain:        { bg: "bg-green-100",  text: "text-green-800",  bar: "bg-green-500",  badge: "bg-green-500" , emoji: "&#9989;"}
             };
 
             const c = couleurs[r.diagnostic] || couleurs["sain"];
@@ -251,6 +251,8 @@
                     <p class="text-sm text-gray-700">${r.message}</p>
                 </div>
                 </div>`;
+
+                demanderExplication(r);
             }
 
             function afficherErreur(msg) {
@@ -299,6 +301,66 @@
                     </div>`;
 
             }
+
+            async function demanderExplication(diagnostic_data) {
+                // Recuperer les donnees du formulaire
+                const explainData = {
+                    diagnostic: diagnostic_data.diagnostic,
+                    probabilite: diagnostic_data.probabilite,
+                    age: parseInt(document.getElementById("age").value),
+                    sexe: document.getElementById("sexe").value,
+                    temperature: parseFloat(document.getElementById("temperature").value),
+                    region: document.getElementById("region").value
+                };
+
+                // Zone d' explication dans le result - section
+                const section = document.getElementById("result-section");
+
+                // Ajouter un placeholder
+                const explDiv = document.createElement("div");
+                explDiv.id = "explication-zone";
+                explDiv.innerHTML = `
+                    <div class ="mt-4 bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    <p class ="text-sm text-purple-600 font-medium mb-2">
+                        Explication (Llama 3)
+                    </p>
+                    <p class ="text-gray-500 text-sm animate-pulse">
+                        Generation en cours ...
+                    </p>
+                    </div>`;
+
+                section.querySelector(".bg-white").appendChild(explDiv);
+
+                try {
+                        const response = await fetch(API_URL + "/explain", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(explainData)
+                        });
+
+                        if (response.ok) {
+                        const result = await response.json();
+                        explDiv.innerHTML = `
+                            <div class ="mt-4 bg-purple-50 rounded-lg p-4 border border-purple-200">
+                            <p class ="text-sm text-purple-600 font-medium mb-2">
+                                Explication (Llama 3)
+                            </p>
+                            <p class ="text-gray-700 text-sm leading-relaxed">
+                                ${result.explication}
+                            </p>
+                            </div>`;
+                        }
+                } catch (error) {
+                    explDiv.innerHTML = `
+                    <div class ="mt-4 bg-gray-50 rounded-lg p-3">
+                        <p class ="text-gray-400 text-sm">
+                        Explication non disponible.
+                        </p>
+                    </div>`;
+                }
+                }
         </script>
 </body>
 </html>

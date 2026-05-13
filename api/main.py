@@ -7,6 +7,22 @@ from pydantic import BaseModel, Field
 import joblib
 import numpy as np
 
+import os
+from dotenv import load_dotenv
+from groq import Groq
+
+# Charger les variables d'environnement
+load_dotenv()
+
+# Client Groq (chargé au démarrage)
+groq_client = None
+groq_api_key = os.getenv("GROQ_API_KEY")
+if groq_api_key:
+    groq_client = Groq(api_key=groq_api_key)
+    print("Client Groq initialisé")
+else:
+    print("ATTENTION : GROQ_API_KEY non trouvée. " "/explain sera desactivé.")
+
 # --- Schema Pydantic ---
 
 class PatientInput(BaseModel):
@@ -27,6 +43,17 @@ class DiagnosticOutput(BaseModel):
     confiance : str = Field(..., description="Niveau de confiance")
     message : str = Field(..., description="Recommandation")
 
+class ExplainInput(BaseModel):
+    diagnostic: str = Field(..., description="Diagnostic prédit par le modèle")
+    probabilite: float = Field(..., description="Probabilité du diagnostic")
+    age: int = Field(...)
+    sexe: str = Field(...)
+    temperature: float = Field(...)
+    region: str = Field(...)
+
+class ExplainOutput(BaseModel):
+    explication: str = Field(..., description="Explication en français")
+    model_llm: str = Field(default="llama-3.1-8b-instant", description="Model LLM utilisé")
 
 # Créer l'application
 app = FastAPI(
@@ -150,3 +177,53 @@ def model_info():
     }
 
 
+# Ajout de la route POST /explain
+SYSTEM_PROMPT = """Tu es un assitant médical sénégalais.
+                          Tu reçois un diagnostic et des données patient.
+                            Expliques le résultat en français simple, comme un médecin parlerait à son patient.
+                            Sois rassurant mais recommande une consultation.
+                            Maximum 3 phrases.
+                            Ne fais JAMAIS de diagnostic toi-même."""
+
+@app.post("/explain", response_model=ExplainOutput)
+def explain(data: ExplainInput):
+    """Expliquer un diagnostic en francais avec un LLM"""
+    if not groq_client:
+        return ExplainOutput(
+            explication="Service d'explication indisponible. "
+                        "Cle API non configurée.",
+            model_llm="aucun"
+        )
+    
+    # Construire le user prompt
+    user_prompt = (
+        f"Patient : {data.sexe}, {data.age} ans, "
+        f"region {data.region}\n"
+        f"Temperature : {data.temperature} C\n"
+        f"Diagnostic du modele : {data.diagnostic}"
+        f"(probabilite {data.probabilite:.0%})\n"
+        f"Explique ce résultat au patient"
+    )
+
+    try:
+        response = groq_client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {
+                    "role": "system",
+                    "content" : SYSTEM_PROMPT
+                },
+                {
+                    "role" : "user",
+                    "content" : user_prompt
+                }
+            ],
+            max_tokens=200,
+            temperature=0.3
+        )
+        explication = response.choices[0].message.content
+    except Exception as e:
+        explication = (
+            f"Erreur lors de l'appel au LLM : {str(e)}"
+        )
+    return ExplainOutput(explication=explication)
