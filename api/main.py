@@ -178,12 +178,19 @@ def model_info():
 
 
 # Ajout de la route POST /explain
-SYSTEM_PROMPT = """Tu es un assitant médical sénégalais.
+SYSTEM_PROMPT = """Tu es un assitant médical sénégalais .
                           Tu reçois un diagnostic et des données patient.
-                            Expliques le résultat en français simple, comme un médecin parlerait à son patient.
+                            Expliques le résultat en le français simple, comme un médecin parlerait à son patient.
                             Sois rassurant mais recommande une consultation.
                             Maximum 3 phrases.
                             Ne fais JAMAIS de diagnostic toi-même."""
+
+# SYSTEM_PROMPT = """Tu es un assitant médical sénégalais qui parle nativement français et wolof donc Francwolof.
+#                           Tu reçois un diagnostic et des données patient.
+#                             Expliques le résultat en altrnant le français et le wolof, comme un médecin parlerait à son patient.
+#                             Sois rassurant mais recommande une consultation.
+#                             Maximum 3 phrases.
+#                             Ne fais JAMAIS de diagnostic toi-même."""
 
 @app.post("/explain", response_model=ExplainOutput)
 def explain(data: ExplainInput):

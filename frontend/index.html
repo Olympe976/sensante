@@ -215,7 +215,7 @@
                 diagnostic: r.diagnostic,
                 probabilite: pct,
                 confiance: r.confiance,
-                emoji: c.emoji
+                color: c
             });
             if (historique.length > 5) historique.pop(); // supprimer le dernier élément si on depasse 5
             // Mettre à jour le tableau affiché
@@ -272,8 +272,8 @@
                 const lignes = historique.map((c, i) => `
                     <tr class="border-t border-gray-100">
                         <td class="py-2 px-3 text-sm text-gray-500">${i + 1}</td>
-                        <td class="py-2 px-3 text-sm font-medium">
-                            ${c.emoji} ${c.diagnostic}
+                        <td class="py-2 px-3 text-sm font-bold uppercase ${c.color.text}">
+                            ${c.color.emoji} ${c.diagnostic}
                         </td>
                         <td class="py-2 px-3 text-sm text-gray-600">${c.probabilite}%</td>
                         <td class="py-2 px-3 text-sm text-gray-600">${c.confiance}</td>
