@@ -1,3 +1,10 @@
+---
+title: Sensante
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
 # Sensante
 
 Assistant de pre-diagnostic medical pour le Senegal.
